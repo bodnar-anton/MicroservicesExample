@@ -10,4 +10,9 @@ public class Message {
         this.id = id;
         this.txt = txt;
     }
+
+    @Override
+    public String toString() {
+        return String.format("id: %s; text: %s", this.id.toString(), this.txt);
+    }
 }
