@@ -1,0 +1,35 @@
+POST http://localhost:8080/facade_service
+Content-Type: application/json
+
+"Message 1"
+###
+
+POST http://localhost:8080/facade_service
+Content-Type: application/json
+
+"Message 2"
+###
+
+POST http://localhost:8080/facade_service
+Content-Type: application/json
+
+"Message 3"
+###
+
+POST http://localhost:8080/facade_service
+Content-Type: application/json
+
+"Message 4"
+###
+
+POST http://localhost:8080/facade_service
+Content-Type: application/json
+
+"Message 5"
+###
+
+POST http://localhost:8080/facade_service
+Content-Type: application/json
+
+"Message 6"
+###

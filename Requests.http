@@ -5,5 +5,5 @@ Accept: text/html
 POST http://localhost:8080/facade_service
 Content-Type: application/json
 
-"msg2"
+"test message"
 ###
