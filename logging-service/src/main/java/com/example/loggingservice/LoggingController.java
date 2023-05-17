@@ -1,5 +1,6 @@
 package com.example.loggingservice;
 
+import com.example.facadeservice.Message;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +16,8 @@ import java.util.logging.Logger;
 @RestController
 public class LoggingController {
 
-    private HazelcastInstance hz = Hazelcast.newHazelcastInstance();
-    private Map<UUID, String> messages = hz.getMap("logging_map");
+    private final HazelcastInstance hz = Hazelcast.newHazelcastInstance();
+    private final Map<UUID, String> messages = hz.getMap("logging_map");
     Logger logger = Logger.getLogger(LoggingController.class.getName());
 
     @GetMapping("/log")
