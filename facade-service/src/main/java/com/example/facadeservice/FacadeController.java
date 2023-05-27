@@ -3,6 +3,9 @@ package com.example.facadeservice;
 import com.hazelcast.collection.IQueue;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,20 +20,16 @@ import java.util.UUID;
 
 @RestController
 public class FacadeController {
+    @Autowired
+    private DiscoveryClient discoveryClient;
+    private final ApplicationConfig applicationConfig;
+    HazelcastInstance hz;
 
-    List<WebClient> loggingWebClients = List.of(
-            WebClient.create("http://localhost:8083"),
-            WebClient.create("http://localhost:8084"),
-            WebClient.create("http://localhost:8085")
-    );
-
-    List<WebClient> messagesWebClients = List.of(
-            WebClient.create("http://localhost:8081"),
-            WebClient.create("http://localhost:8082")
-    );
-
-    HazelcastInstance hz = Hazelcast.newHazelcastInstance();
-    IQueue<Message> queue = hz.getQueue("messages");
+    @Autowired
+    public FacadeController(ApplicationConfig applicationConfig) {
+        this.applicationConfig = applicationConfig;
+        this.hz = Hazelcast.newHazelcastInstance();
+    }
 
     @GetMapping("/facade_service")
     public Mono<String> getClient() {
@@ -54,6 +53,7 @@ public class FacadeController {
     public Mono<Void> postClient(@RequestBody String text) {
         var loggingWebClient = getRandomLoggingClient();
         var msg = new Message(UUID.randomUUID(), text);
+        IQueue<Message> queue = hz.getQueue(applicationConfig.getQueueName());
         queue.add(msg);
 
         return loggingWebClient.post()
@@ -65,17 +65,20 @@ public class FacadeController {
     }
 
     public WebClient getRandomLoggingClient() {
-        Random rand = new Random();
-        int index = rand.nextInt(loggingWebClients.size());
+        String loggingServiceID = "logging-service";
+        List<ServiceInstance> instances = discoveryClient.getInstances(loggingServiceID);
+        int randomIndex = new Random().nextInt(instances.size());
+        ServiceInstance randomInstance = instances.get(randomIndex);
 
-        return loggingWebClients.get(index);
+        return WebClient.create(randomInstance.getUri().toString());
     }
 
     public WebClient getRandomMessagesClient() {
-        Random rand = new Random();
-        int index = rand.nextInt(messagesWebClients.size());
+        String messagesServiceID = "messages-service";
+        List<ServiceInstance> instances = discoveryClient.getInstances(messagesServiceID);
+        int randomIndex = new Random().nextInt(instances.size());
+        ServiceInstance randomInstance = instances.get(randomIndex);
 
-        return messagesWebClients.get(index);
+        return WebClient.create(randomInstance.getUri().toString());
     }
-
 }
